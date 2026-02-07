@@ -135,4 +135,43 @@
   <data name="CoinsLimit" xml:space="preserve">
     <value>Coins</value>
   </data>
+  <data name="Page" xml:space="preserve">
+    <value>Page</value>
+  </data>
+  <data name="PageOf" xml:space="preserve">
+    <value>Page {0} of {1}</value>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>First</value>
+  </data>
+  <data name="Last" xml:space="preserve">
+    <value>Last</value>
+  </data>
+  <data name="SortMarketCap" xml:space="preserve">
+    <value>Market Cap</value>
+  </data>
+  <data name="SortVolume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="SortAsc" xml:space="preserve">
+    <value>Ascending</value>
+  </data>
+  <data name="SortDesc" xml:space="preserve">
+    <value>Descending</value>
+  </data>
+  <data name="CachedData" xml:space="preserve">
+    <value>Cached</value>
+  </data>
+  <data name="FetchFromApi" xml:space="preserve">
+    <value>Fetch from API</value>
+  </data>
+  <data name="ShowPerPage" xml:space="preserve">
+    <value>Show per page</value>
+  </data>
 </root>
