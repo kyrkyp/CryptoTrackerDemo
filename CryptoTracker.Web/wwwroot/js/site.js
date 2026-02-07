@@ -1,4 +1,4 @@
-﻿﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+﻿﻿﻿﻿﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
@@ -114,11 +114,14 @@
     var grid = document.querySelector("[data-coins-grid]");
     var searchInput = document.getElementById("coinSearch");
     var sortSelect = document.getElementById("coinSort");
+    var sortBySelect = document.getElementById("sortBySelect");
+    var sortDirSelect = document.getElementById("sortDirSelect");
     var countElement = document.getElementById("coinCount");
     var favoritesOnly = document.getElementById("favoritesOnly");
     var favoritesFirst = document.getElementById("favoritesFirst");
     var currencySelect = document.getElementById("currencySelect");
-    var perPageSelect = document.getElementById("perPageSelect");
+    var fetchCountSelect = document.getElementById("fetchCountSelect");
+    var displayPerPageSelect = document.getElementById("displayPerPageSelect");
     var autoRefreshToggle = document.getElementById("autoRefreshToggle");
     var refreshInterval = document.getElementById("refreshInterval");
     var liveIndicator = document.getElementById("liveIndicator");
@@ -134,6 +137,22 @@
 
     if (currencySelect && currencySelect.dataset.current) {
       currencySelect.value = currencySelect.dataset.current;
+    }
+
+    if (fetchCountSelect && fetchCountSelect.dataset.current) {
+      fetchCountSelect.value = fetchCountSelect.dataset.current;
+    }
+
+    if (displayPerPageSelect && displayPerPageSelect.dataset.current) {
+      displayPerPageSelect.value = displayPerPageSelect.dataset.current;
+    }
+
+    if (sortBySelect && sortBySelect.dataset.current) {
+      sortBySelect.value = sortBySelect.dataset.current;
+    }
+
+    if (sortDirSelect && sortDirSelect.dataset.current) {
+      sortDirSelect.value = sortDirSelect.dataset.current;
     }
 
     var refreshSettings = loadRefreshSettings();
@@ -317,16 +336,29 @@
     if (currencySelect && typeof uiState.currency === "string") {
       currencySelect.value = uiState.currency;
     }
-    if (perPageSelect && typeof uiState.perPage === "string") {
-      perPageSelect.value = uiState.perPage;
+    if (fetchCountSelect && typeof uiState.fetchCount === "string") {
+      fetchCountSelect.value = uiState.fetchCount;
+    }
+    if (displayPerPageSelect && typeof uiState.displayPerPage === "string") {
+      displayPerPageSelect.value = uiState.displayPerPage;
     }
 
     if (currencySelect) {
       currencySelect.addEventListener("change", function () {
         var url = new URL(window.location.href);
         url.searchParams.set("currency", currencySelect.value);
-        if (perPageSelect) {
-          url.searchParams.set("perPage", perPageSelect.value);
+        url.searchParams.set("page", "1"); // Reset to first page
+        if (fetchCountSelect) {
+          url.searchParams.set("fetchCount", fetchCountSelect.value);
+        }
+        if (displayPerPageSelect) {
+          url.searchParams.set("displayPerPage", displayPerPageSelect.value);
+        }
+        if (sortBySelect) {
+          url.searchParams.set("sortBy", sortBySelect.value);
+        }
+        if (sortDirSelect) {
+          url.searchParams.set("desc", sortDirSelect.value === "desc" ? "true" : "false");
         }
         saveUiState({
           query: searchInput ? searchInput.value : "",
@@ -334,21 +366,31 @@
           favoritesOnly: favoritesOnly ? favoritesOnly.checked : false,
           favoritesFirst: favoritesFirst ? favoritesFirst.checked : false,
           currency: currencySelect.value,
-          perPage: perPageSelect ? perPageSelect.value : ""
+          fetchCount: fetchCountSelect ? fetchCountSelect.value : "",
+          displayPerPage: displayPerPageSelect ? displayPerPageSelect.value : "",
+          sortBy: sortBySelect ? sortBySelect.value : "market_cap",
+          sortDir: sortDirSelect ? sortDirSelect.value : "desc"
         });
         window.location.href = url.toString();
       });
     }
 
-    if (perPageSelect) {
-      if (perPageSelect.dataset.current) {
-        perPageSelect.value = perPageSelect.dataset.current;
-      }
-      perPageSelect.addEventListener("change", function () {
+    if (fetchCountSelect) {
+      fetchCountSelect.addEventListener("change", function () {
         var url = new URL(window.location.href);
-        url.searchParams.set("perPage", perPageSelect.value);
+        url.searchParams.set("fetchCount", fetchCountSelect.value);
+        url.searchParams.set("page", "1"); // Reset to first page
         if (currencySelect) {
           url.searchParams.set("currency", currencySelect.value);
+        }
+        if (displayPerPageSelect) {
+          url.searchParams.set("displayPerPage", displayPerPageSelect.value);
+        }
+        if (sortBySelect) {
+          url.searchParams.set("sortBy", sortBySelect.value);
+        }
+        if (sortDirSelect) {
+          url.searchParams.set("desc", sortDirSelect.value === "desc" ? "true" : "false");
         }
         saveUiState({
           query: searchInput ? searchInput.value : "",
@@ -356,10 +398,85 @@
           favoritesOnly: favoritesOnly ? favoritesOnly.checked : false,
           favoritesFirst: favoritesFirst ? favoritesFirst.checked : false,
           currency: currencySelect ? currencySelect.value : "",
-          perPage: perPageSelect.value
+          fetchCount: fetchCountSelect.value,
+          displayPerPage: displayPerPageSelect ? displayPerPageSelect.value : "",
+          sortBy: sortBySelect ? sortBySelect.value : "market_cap",
+          sortDir: sortDirSelect ? sortDirSelect.value : "desc"
         });
         window.location.href = url.toString();
       });
+    }
+
+    if (displayPerPageSelect) {
+      displayPerPageSelect.addEventListener("change", function () {
+        var url = new URL(window.location.href);
+        url.searchParams.set("displayPerPage", displayPerPageSelect.value);
+        url.searchParams.set("page", "1"); // Reset to first page
+        if (currencySelect) {
+          url.searchParams.set("currency", currencySelect.value);
+        }
+        if (fetchCountSelect) {
+          url.searchParams.set("fetchCount", fetchCountSelect.value);
+        }
+        if (sortBySelect) {
+          url.searchParams.set("sortBy", sortBySelect.value);
+        }
+        if (sortDirSelect) {
+          url.searchParams.set("desc", sortDirSelect.value === "desc" ? "true" : "false");
+        }
+        saveUiState({
+          query: searchInput ? searchInput.value : "",
+          sort: sortSelect ? sortSelect.value : "name",
+          favoritesOnly: favoritesOnly ? favoritesOnly.checked : false,
+          favoritesFirst: favoritesFirst ? favoritesFirst.checked : false,
+          currency: currencySelect ? currencySelect.value : "",
+          fetchCount: fetchCountSelect ? fetchCountSelect.value : "",
+          displayPerPage: displayPerPageSelect.value,
+          sortBy: sortBySelect ? sortBySelect.value : "market_cap",
+          sortDir: sortDirSelect ? sortDirSelect.value : "desc"
+        });
+        window.location.href = url.toString();
+      });
+    }
+
+    function navigateWithParams() {
+      var url = new URL(window.location.href);
+      if (currencySelect) {
+        url.searchParams.set("currency", currencySelect.value);
+      }
+      if (fetchCountSelect) {
+        url.searchParams.set("fetchCount", fetchCountSelect.value);
+      }
+      if (displayPerPageSelect) {
+        url.searchParams.set("displayPerPage", displayPerPageSelect.value);
+      }
+      if (sortBySelect) {
+        url.searchParams.set("sortBy", sortBySelect.value);
+      }
+      if (sortDirSelect) {
+        url.searchParams.set("desc", sortDirSelect.value === "desc" ? "true" : "false");
+      }
+      url.searchParams.set("page", "1"); // Reset to first page on sort change
+      saveUiState({
+        query: searchInput ? searchInput.value : "",
+        sort: sortSelect ? sortSelect.value : "name",
+        favoritesOnly: favoritesOnly ? favoritesOnly.checked : false,
+        favoritesFirst: favoritesFirst ? favoritesFirst.checked : false,
+        currency: currencySelect ? currencySelect.value : "",
+        fetchCount: fetchCountSelect ? fetchCountSelect.value : "",
+        displayPerPage: displayPerPageSelect ? displayPerPageSelect.value : "",
+        sortBy: sortBySelect ? sortBySelect.value : "market_cap",
+        sortDir: sortDirSelect ? sortDirSelect.value : "desc"
+      });
+      window.location.href = url.toString();
+    }
+
+    if (sortBySelect) {
+      sortBySelect.addEventListener("change", navigateWithParams);
+    }
+
+    if (sortDirSelect) {
+      sortDirSelect.addEventListener("change", navigateWithParams);
     }
 
     function showToast(message) {
@@ -382,7 +499,10 @@
         favoritesOnly: favoritesOnly ? favoritesOnly.checked : false,
         favoritesFirst: favoritesFirst ? favoritesFirst.checked : false,
         currency: currencySelect ? currencySelect.value : "",
-        perPage: perPageSelect ? perPageSelect.value : ""
+        fetchCount: fetchCountSelect ? fetchCountSelect.value : "",
+        displayPerPage: displayPerPageSelect ? displayPerPageSelect.value : "",
+        sortBy: sortBySelect ? sortBySelect.value : "market_cap",
+        sortDir: sortDirSelect ? sortDirSelect.value : "desc"
       });
     }
 
@@ -415,10 +535,6 @@
         }
         if (favoritesFirst) {
           favoritesFirst.checked = false;
-        }
-        if (perPageSelect) {
-          var defaultPerPage = perPageSelect.dataset.default || "10";
-          perPageSelect.value = defaultPerPage;
         }
         applyFilterAndSort();
         var filtersMessage = uiToast ? uiToast.dataset.toastFilters : "";

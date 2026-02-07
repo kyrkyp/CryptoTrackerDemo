@@ -1,4 +1,4 @@
-﻿@page
+@page
 @using System.Globalization
 @using CryptoTracker.Core
 @using Microsoft.Extensions.Localization
@@ -7,8 +7,8 @@
 
 @{
     ViewData["Title"] = "Home";
-    var topGainer = Model.Coins.OrderByDescending(c => c.Change24H).FirstOrDefault();
-    var topLoser = Model.Coins.OrderBy(c => c.Change24H).FirstOrDefault();
+    var topGainer = Model.AllCoins.OrderByDescending(c => c.Change24H).FirstOrDefault();
+    var topLoser = Model.AllCoins.OrderBy(c => c.Change24H).FirstOrDefault();
     var lastUpdatedText = Model.LastUpdated?.ToString("g") ?? "-";
     var currencyCode = Model.Currency.ToUpperInvariant();
     var currencySymbol = Model.CurrencySymbol;
@@ -32,7 +32,7 @@
     <div class="col-12 col-md-4">
         <div class="stat-card">
             <div class="stat-label">@Localizer["CoinsTracked"]</div>
-            <div class="stat-value">@Model.Coins.Count</div>
+            <div class="stat-value">@Model.AllCoins.Count</div>
         </div>
     </div>
     <div class="col-12 col-md-4">
@@ -64,7 +64,7 @@
         </div>
     </div>
 }
-else if (Model.Coins.Count == 0)
+else if (Model.AllCoins.Count == 0)
 {
     <div class="state-card state-empty">
         <div class="state-title">@Localizer["NoData"]</div>
@@ -77,32 +77,57 @@ else
 {
     <div class="filters-card mb-3">
         <div class="row g-2 align-items-center">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-lg-3">
                 <input id="coinSearch" class="form-control" type="search" placeholder="@Localizer["SearchPlaceholder"]" aria-label="@Localizer["SearchPlaceholder"]" />
             </div>
-            <div class="col-12 col-md-3">
-                <select id="coinSort" class="form-select" aria-label="@Localizer["SortBy"]">
+            <div class="col-6 col-md-3 col-lg-2">
+                <select id="sortBySelect" class="form-select" aria-label="@Localizer["SortBy"]" data-current="@Model.SortBy">
+                    <option value="market_cap">@Localizer["SortMarketCap"]</option>
                     <option value="name">@Localizer["SortName"]</option>
                     <option value="price">@Localizer["SortPrice"]</option>
                     <option value="change">@Localizer["SortChange"]</option>
+                    <option value="volume">@Localizer["SortVolume"]</option>
                 </select>
             </div>
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2 col-lg-1">
+                <select id="sortDirSelect" class="form-select" aria-label="Sort direction" data-current="@(Model.SortDescending ? "desc" : "asc")">
+                    <option value="desc">↓</option>
+                    <option value="asc">↑</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2 col-lg-1">
                 <select id="currencySelect" class="form-select" aria-label="@Localizer["Currency"]" data-current="@Model.Currency">
-                    <option value="eur">@Localizer["CurrencyEur"]</option>
-                    <option value="usd">@Localizer["CurrencyUsd"]</option>
-                    <option value="gbp">@Localizer["CurrencyGbp"]</option>
+                    <option value="eur">EUR</option>
+                    <option value="usd">USD</option>
+                    <option value="gbp">GBP</option>
                 </select>
             </div>
-            <div class="col-6 col-md-1">
-                <select id="perPageSelect" class="form-select" aria-label="@Localizer["CoinsLimit"]" data-current="@Model.PerPage" data-default="10">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                </select>
+            <div class="col-6 col-md-2 col-lg-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">API</span>
+                    <select id="fetchCountSelect" class="form-select" aria-label="@Localizer["FetchFromApi"]" data-current="@Model.FetchCount">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-6 col-md-2 text-md-end">
-                <div id="coinCount" class="text-muted small" data-count-label="@Localizer["ResultsCount"]"></div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">Show</span>
+                    <select id="displayPerPageSelect" class="form-select" aria-label="@Localizer["ShowPerPage"]" data-current="@Model.DisplayPerPage">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-12 col-lg-1 text-lg-end">
+                @if (Model.FromCache)
+                {
+                    <span class="badge bg-secondary">@Localizer["CachedData"]</span>
+                }
             </div>
         </div>
         <div class="row g-2 align-items-center mt-2">
@@ -152,7 +177,7 @@ else
     </div>
 
     <div class="coin-grid row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" data-coins-grid>
-        @foreach (var coin in Model.Coins)
+        @foreach (var coin in Model.DisplayedCoins)
         {
             var sparklineValues = coin.Sparkline7D.Count > 0
                 ? string.Join(",", coin.Sparkline7D.Select(v => v.ToString(CultureInfo.InvariantCulture)))
@@ -189,6 +214,43 @@ else
             </div>
         }
     </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center flex-wrap">
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link" href="/Index?currency=@Model.Currency&fetchCount=@Model.FetchCount&displayPerPage=@Model.DisplayPerPage&page=1&sortBy=@Model.SortBy&desc=@Model.SortDescending" aria-label="@Localizer["First"]">
+                        &laquo;
+                    </a>
+                </li>
+                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                    <a class="page-link" href="/Index?currency=@Model.Currency&fetchCount=@Model.FetchCount&displayPerPage=@Model.DisplayPerPage&page=@(Model.CurrentPage - 1)&sortBy=@Model.SortBy&desc=@Model.SortDescending" aria-label="@Localizer["Previous"]">
+                        &lsaquo;
+                    </a>
+                </li>
+                @{var startPage = Math.Max(1, Model.CurrentPage - 2); var endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);}
+                @for (var i = startPage; i <= endPage; i++)
+                {
+                    var pageNum = i;
+                    <li class="page-item @(pageNum == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="/Index?currency=@Model.Currency&fetchCount=@Model.FetchCount&displayPerPage=@Model.DisplayPerPage&page=@pageNum&sortBy=@Model.SortBy&desc=@Model.SortDescending">@pageNum</a>
+                    </li>
+                }
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link" href="/Index?currency=@Model.Currency&fetchCount=@Model.FetchCount&displayPerPage=@Model.DisplayPerPage&page=@(Model.CurrentPage + 1)&sortBy=@Model.SortBy&desc=@Model.SortDescending" aria-label="@Localizer["Next"]">
+                        &rsaquo;
+                    </a>
+                </li>
+                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                    <a class="page-link" href="/Index?currency=@Model.Currency&fetchCount=@Model.FetchCount&displayPerPage=@Model.DisplayPerPage&page=@Model.TotalPages&sortBy=@Model.SortBy&desc=@Model.SortDescending" aria-label="@Localizer["Last"]">
+                        &raquo;
+                    </a>
+                </li>
+            </ul>
+            <div class="text-center text-muted small mt-2">@Localizer["PageOf", Model.CurrentPage, Model.TotalPages]</div>
+        </nav>
+    }
 
     <div id="uiToast" class="ui-toast" role="status" aria-live="polite" data-toast-filters="@Localizer["FiltersCleared"]" data-toast-favorites="@Localizer["FavoritesCleared"]"></div>
 }
