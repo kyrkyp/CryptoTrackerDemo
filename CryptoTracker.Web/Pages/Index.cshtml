@@ -1,0 +1,81 @@
+﻿@page
+@using CryptoTracker.Core
+@using Microsoft.Extensions.Localization
+@model IndexModel
+@inject  IStringLocalizer<SharedResource> Localizer
+
+@{
+    ViewData["Title"] = "Home";
+    var topGainer = Model.Coins.OrderByDescending(c => c.Change24H).FirstOrDefault();
+    var topLoser = Model.Coins.OrderBy(c => c.Change24H).FirstOrDefault();
+}
+
+<section class="hero-card mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div>
+            <h1 class="display-6 fw-semibold mb-2">@Localizer["WelcomeMessage"]</h1>
+            <p class="text-muted mb-0">Live market prices powered by CoinGecko. Prices shown in EUR.</p>
+        </div>
+        <div class="text-md-end">
+            <div class="text-muted small">Last updated</div>
+            <div class="fw-semibold">@DateTime.Now.ToString("g")</div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Coins tracked</div>
+            <div class="stat-value">@Model.Coins.Count</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Top gainer (24h)</div>
+            <div class="stat-value">@(topGainer?.Symbol ?? "-")</div>
+            <div class="stat-sub @(topGainer is not null && topGainer.Change24H >= 0 ? "change-positive" : "change-negative")">
+                @(topGainer is null ? "-" : $"{topGainer.Change24H:N2}%")
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Top loser (24h)</div>
+            <div class="stat-value">@(topLoser?.Symbol ?? "-")</div>
+            <div class="stat-sub @(topLoser is not null && topLoser.Change24H >= 0 ? "change-positive" : "change-negative")">
+                @(topLoser is null ? "-" : $"{topLoser.Change24H:N2}%")
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+            <tr>
+                <th>@Localizer["CoinName"]</th>
+                <th>Symbol</th>
+                <th>@Localizer["Price"] (EUR)</th>
+                <th>Change (24h)</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var coin in Model.Coins)
+            {
+                <tr>
+                    <td class="fw-semibold">@coin.Name</td>
+                    <td class="text-uppercase text-muted">@coin.Symbol</td>
+                    <td>€@coin.Price.ToString("N2")</td>
+                    <td>
+                        <span class="change-badge @(coin.Change24H >= 0 ? "change-positive" : "change-negative")">
+                            @coin.Change24H.ToString("N2")%
+                        </span>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
