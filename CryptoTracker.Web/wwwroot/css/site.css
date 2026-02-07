@@ -22,6 +22,92 @@ body {
   box-shadow: 0 10px 30px rgba(17, 24, 39, 0.2);
 }
 
+.last-updated-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.85rem;
+  padding: 0.6rem 0.85rem;
+}
+
+.filters-card {
+  background: #ffffff;
+  border-radius: 0.9rem;
+  border: 1px solid #eef1f6;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+}
+
+.state-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #eef1f6;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  text-align: center;
+}
+
+.state-title {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.state-error {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.state-empty {
+  border-color: rgba(59, 130, 246, 0.25);
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.skeleton-grid {
+  display: none;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.skeleton-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #eef1f6;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.skeleton-line {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #eef1f6 0%, #f8fafc 50%, #eef1f6 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+  margin-bottom: 0.6rem;
+}
+
+.skeleton-line.short {
+  width: 40%;
+}
+
+.skeleton-line.long {
+  width: 80%;
+}
+
+.page-loading .skeleton-grid {
+  display: grid;
+}
+
+.page-loading .coin-grid {
+  display: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .stat-card {
   background: #ffffff;
   border-radius: 0.9rem;
@@ -54,6 +140,45 @@ body {
   border: 1px solid #eef1f6;
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
   overflow: hidden;
+}
+
+.coin-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #eef1f6;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.coin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+}
+
+.coin-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.coin-symbol {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+}
+
+.coin-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+}
+
+.coin-meta {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .table thead th {
@@ -110,4 +235,106 @@ html {
 .form-floating > .form-control-plaintext:focus::placeholder,
 .form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #047857;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.favorite-toggle {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #9ca3af;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.15s ease;
+}
+
+.favorite-toggle:hover {
+  border-color: #fbbf24;
+  color: #f59e0b;
+}
+
+.favorite-toggle.is-active {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.favorite-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.35rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ui-toast {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  font-size: 0.85rem;
+}
+
+.ui-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.coin-stats {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.coin-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.coin-stat .stat-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  font-size: 0.7rem;
+}
+
+.coin-stat .stat-value {
+  font-weight: 600;
+}
+
+.sparkline {
+  margin-top: 0.6rem;
+  width: 100%;
+  height: 32px;
+  color: #2563eb;
 }

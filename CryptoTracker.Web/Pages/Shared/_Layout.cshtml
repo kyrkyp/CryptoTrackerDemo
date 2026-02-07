@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using System.Globalization
+@using CryptoTracker.Core
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> Localizer
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -9,7 +13,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/CryptoTracker.Web.styles.css" asp-append-version="true"/>
 </head>
-<body>
+<body class="page-loading">
 <header>
     <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom box-shadow mb-4">
         <div class="container">
@@ -21,12 +25,20 @@
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
-                        <a class="nav-link text-light" asp-area="" asp-page="/Index">Home</a>
+                        <a class="nav-link text-light" asp-area="" asp-page="/Index">@Localizer["NavHome"]</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-light" asp-area="" asp-page="/Privacy">Privacy</a>
+                        <a class="nav-link text-light" asp-area="" asp-page="/Privacy">@Localizer["NavPrivacy"]</a>
                     </li>
                 </ul>
+                <form class="d-flex align-items-center" asp-page="/SetCulture" method="get">
+                    <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                    <label class="text-light small me-2" for="cultureSelect">@Localizer["Language"]</label>
+                    <select id="cultureSelect" name="culture" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="en-US" selected="@(CultureInfo.CurrentUICulture.Name == "en-US")">English</option>
+                        <option value="el-GR" selected="@(CultureInfo.CurrentUICulture.Name == "el-GR")">Ελληνικά</option>
+                    </select>
+                </form>
             </div>
         </div>
     </nav>

@@ -21,9 +21,12 @@ public class CryptoService : ICryptoService
         _cache = cache;
     }
 
-    public async Task<List<Coin>> GetCoinsAsync()
+    public async Task<List<Coin>> GetCoinsAsync(string? vsCurrency = null, bool? sparkline = null, int? perPage = null)
     {
-        var cacheKey = $"coingecko:{_options.VsCurrency}:{_options.PerPage}:{_options.Order}:{_options.Precision}";
+        var resolvedCurrency = string.IsNullOrWhiteSpace(vsCurrency) ? _options.VsCurrency : vsCurrency.Trim().ToLowerInvariant();
+        var resolvedSparkline = sparkline ?? _options.Sparkline;
+        var resolvedPerPage = perPage.HasValue && perPage.Value > 0 ? perPage.Value : _options.PerPage;
+        var cacheKey = $"coingecko:{resolvedCurrency}:{resolvedPerPage}:{_options.Order}:{_options.Precision}:{resolvedSparkline}";
         List<Coin>? cachedCoins = null;
 
         if (_options.CacheSeconds > 0 && _cache.TryGetValue(cacheKey, out List<Coin>? cachedValue))
@@ -34,11 +37,11 @@ public class CryptoService : ICryptoService
 
         var query = new Dictionary<string, string>
         {
-            ["vs_currency"] = _options.VsCurrency,
+            ["vs_currency"] = resolvedCurrency,
             ["order"] = _options.Order,
-            ["per_page"] = _options.PerPage.ToString(),
+            ["per_page"] = resolvedPerPage.ToString(),
             ["page"] = "1",
-            ["sparkline"] = _options.Sparkline.ToString().ToLowerInvariant(),
+            ["sparkline"] = resolvedSparkline.ToString().ToLowerInvariant(),
             ["price_change_percentage"] = "24h",
             ["precision"] = _options.Precision.ToString()
         };
@@ -65,10 +68,14 @@ public class CryptoService : ICryptoService
         var coins = payload.Select(dto => new Coin
             {
                 Id = Guid.NewGuid(),
+                ApiId = dto.Id ?? string.Empty,
                 Name = dto.Name ?? string.Empty,
                 Symbol = (dto.Symbol ?? string.Empty).ToUpperInvariant(),
                 Price = dto.CurrentPrice,
-                Change24H = dto.PriceChangePercentage24H ?? 0
+                Change24H = dto.PriceChangePercentage24H ?? 0,
+                MarketCap = dto.MarketCap ?? 0,
+                Volume24H = dto.TotalVolume ?? 0,
+                Sparkline7D = dto.SparklineIn7D?.Price ?? new List<decimal>()
             })
             .ToList();
 
@@ -91,5 +98,20 @@ public class CryptoService : ICryptoService
 
         [JsonPropertyName("price_change_percentage_24h")]
         public double? PriceChangePercentage24H { get; init; }
+
+        [JsonPropertyName("market_cap")]
+        public decimal? MarketCap { get; init; }
+
+        [JsonPropertyName("total_volume")]
+        public decimal? TotalVolume { get; init; }
+
+        [JsonPropertyName("sparkline_in_7d")]
+        public SparklineDto? SparklineIn7D { get; init; }
+    }
+
+    private sealed class SparklineDto
+    {
+        [JsonPropertyName("price")]
+        public List<decimal>? Price { get; init; }
     }
 }
