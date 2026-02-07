@@ -1,4 +1,5 @@
 ﻿@page
+@using System.Globalization
 @using CryptoTracker.Core
 @using Microsoft.Extensions.Localization
 @model IndexModel
@@ -8,17 +9,21 @@
     ViewData["Title"] = "Home";
     var topGainer = Model.Coins.OrderByDescending(c => c.Change24H).FirstOrDefault();
     var topLoser = Model.Coins.OrderBy(c => c.Change24H).FirstOrDefault();
+    var lastUpdatedText = Model.LastUpdated?.ToString("g") ?? "-";
+    var currencyCode = Model.Currency.ToUpperInvariant();
+    var currencySymbol = Model.CurrencySymbol;
 }
 
 <section class="hero-card mb-4">
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
         <div>
             <h1 class="display-6 fw-semibold mb-2">@Localizer["WelcomeMessage"]</h1>
-            <p class="text-muted mb-0">Live market prices powered by CoinGecko. Prices shown in EUR.</p>
+            <p class="text-muted mb-1">@Localizer["LiveMarketPrices"]</p>
+            <p class="text-muted mb-0">@Localizer["PricesIn", currencyCode]</p>
         </div>
-        <div class="text-md-end">
-            <div class="text-muted small">Last updated</div>
-            <div class="fw-semibold">@DateTime.Now.ToString("g")</div>
+        <div class="last-updated-pill text-md-end">
+            <div class="text-muted small">@Localizer["LastUpdated"]</div>
+            <div class="fw-semibold">@lastUpdatedText</div>
         </div>
     </div>
 </section>
@@ -26,13 +31,13 @@
 <div class="row g-3 mb-4">
     <div class="col-12 col-md-4">
         <div class="stat-card">
-            <div class="stat-label">Coins tracked</div>
+            <div class="stat-label">@Localizer["CoinsTracked"]</div>
             <div class="stat-value">@Model.Coins.Count</div>
         </div>
     </div>
     <div class="col-12 col-md-4">
         <div class="stat-card">
-            <div class="stat-label">Top gainer (24h)</div>
+            <div class="stat-label">@Localizer["TopGainer24h"]</div>
             <div class="stat-value">@(topGainer?.Symbol ?? "-")</div>
             <div class="stat-sub @(topGainer is not null && topGainer.Change24H >= 0 ? "change-positive" : "change-negative")">
                 @(topGainer is null ? "-" : $"{topGainer.Change24H:N2}%")
@@ -41,7 +46,7 @@
     </div>
     <div class="col-12 col-md-4">
         <div class="stat-card">
-            <div class="stat-label">Top loser (24h)</div>
+            <div class="stat-label">@Localizer["TopLoser24h"]</div>
             <div class="stat-value">@(topLoser?.Symbol ?? "-")</div>
             <div class="stat-sub @(topLoser is not null && topLoser.Change24H >= 0 ? "change-positive" : "change-negative")">
                 @(topLoser is null ? "-" : $"{topLoser.Change24H:N2}%")
@@ -50,32 +55,140 @@
     </div>
 </div>
 
-<div class="table-card">
-    <div class="table-responsive">
-        <table class="table align-middle mb-0">
-            <thead>
-            <tr>
-                <th>@Localizer["CoinName"]</th>
-                <th>Symbol</th>
-                <th>@Localizer["Price"] (EUR)</th>
-                <th>Change (24h)</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var coin in Model.Coins)
-            {
-                <tr>
-                    <td class="fw-semibold">@coin.Name</td>
-                    <td class="text-uppercase text-muted">@coin.Symbol</td>
-                    <td>€@coin.Price.ToString("N2")</td>
-                    <td>
-                        <span class="change-badge @(coin.Change24H >= 0 ? "change-positive" : "change-negative")">
-                            @coin.Change24H.ToString("N2")%
-                        </span>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
+@if (Model.HasError)
+{
+    <div class="state-card state-error">
+        <div class="state-title">@(Model.IsRateLimited ? Localizer["ErrorRateLimit"] : Localizer["ErrorLoading"])</div>
+        <div class="state-actions">
+            <a class="btn btn-primary" asp-page="/Index">@Localizer["Retry"]</a>
+        </div>
     </div>
-</div>
+}
+else if (Model.Coins.Count == 0)
+{
+    <div class="state-card state-empty">
+        <div class="state-title">@Localizer["NoData"]</div>
+        <div class="state-actions">
+            <a class="btn btn-primary" asp-page="/Index">@Localizer["Retry"]</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="filters-card mb-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
+                <input id="coinSearch" class="form-control" type="search" placeholder="@Localizer["SearchPlaceholder"]" aria-label="@Localizer["SearchPlaceholder"]" />
+            </div>
+            <div class="col-12 col-md-3">
+                <select id="coinSort" class="form-select" aria-label="@Localizer["SortBy"]">
+                    <option value="name">@Localizer["SortName"]</option>
+                    <option value="price">@Localizer["SortPrice"]</option>
+                    <option value="change">@Localizer["SortChange"]</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select id="currencySelect" class="form-select" aria-label="@Localizer["Currency"]" data-current="@Model.Currency">
+                    <option value="eur">@Localizer["CurrencyEur"]</option>
+                    <option value="usd">@Localizer["CurrencyUsd"]</option>
+                    <option value="gbp">@Localizer["CurrencyGbp"]</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-1">
+                <select id="perPageSelect" class="form-select" aria-label="@Localizer["CoinsLimit"]" data-current="@Model.PerPage" data-default="10">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2 text-md-end">
+                <div id="coinCount" class="text-muted small" data-count-label="@Localizer["ResultsCount"]"></div>
+            </div>
+        </div>
+        <div class="row g-2 align-items-center mt-2">
+            <div class="col-12 col-md-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="favoritesOnly" />
+                    <label class="form-check-label" for="favoritesOnly">@Localizer["FavoritesOnly"]</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="favoritesFirst" />
+                    <label class="form-check-label" for="favoritesFirst">@Localizer["FavoritesFirst"]</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="autoRefreshToggle" />
+                    <label class="form-check-label" for="autoRefreshToggle">@Localizer["AutoRefresh"]</label>
+                    <span id="liveIndicator" class="live-pill ms-2 d-none">@Localizer["Live"]</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="me-2 text-muted small" for="refreshInterval">@Localizer["RefreshInterval"]</label>
+                <select id="refreshInterval" class="form-select form-select-sm d-inline-block w-auto">
+                    <option value="30">30s</option>
+                    <option value="60">60s</option>
+                    <option value="120">120s</option>
+                </select>
+            </div>
+            <div class="col-12 col-md-6 text-md-end">
+                <button type="button" id="clearFilters" class="btn btn-sm btn-outline-secondary">@Localizer["ClearFilters"]</button>
+                <button type="button" id="clearFavorites" class="btn btn-sm btn-outline-warning ms-2">@Localizer["ClearFavorites"]</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="skeleton-grid mb-3" aria-hidden="true">
+        @for (var i = 0; i < 6; i++)
+        {
+            <div class="skeleton-card">
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line long"></div>
+            </div>
+        }
+    </div>
+
+    <div class="coin-grid row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" data-coins-grid>
+        @foreach (var coin in Model.Coins)
+        {
+            var sparklineValues = coin.Sparkline7D.Count > 0
+                ? string.Join(",", coin.Sparkline7D.Select(v => v.ToString(CultureInfo.InvariantCulture)))
+                : string.Empty;
+            <div class="col" data-coin-card data-coin-id="@coin.ApiId" data-name="@coin.Name" data-symbol="@coin.Symbol" data-price="@coin.Price.ToString(CultureInfo.InvariantCulture)" data-change="@coin.Change24H.ToString(CultureInfo.InvariantCulture)">
+                <div class="coin-card h-100">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div class="coin-name">@coin.Name</div>
+                            <div class="coin-symbol text-uppercase">@coin.Symbol</div>
+                            <span class="favorite-badge d-none" data-favorite-badge>@Localizer["FavoriteBadge"]</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="favorite-toggle" data-favorite-button aria-label="@Localizer["FavoritesOnly"]" aria-pressed="false">&star;</button>
+                            <span class="change-badge @(coin.Change24H >= 0 ? "change-positive" : "change-negative")">
+                                @coin.Change24H.ToString("N2")%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="coin-price">@currencySymbol@coin.Price.ToString("N2")</div>
+                    <div class="coin-meta text-muted">@Localizer["Price"] (@currencyCode)</div>
+                    <div class="coin-stats">
+                        <div class="coin-stat">
+                            <span class="stat-label" title="@Localizer["MarketCapTooltip"]">@Localizer["MarketCap"]</span>
+                            <span class="stat-value">@currencySymbol@coin.MarketCap.ToString("N0")</span>
+                        </div>
+                        <div class="coin-stat">
+                            <span class="stat-label" title="@Localizer["Volume24hTooltip"]">@Localizer["Volume24h"]</span>
+                            <span class="stat-value">@currencySymbol@coin.Volume24H.ToString("N0")</span>
+                        </div>
+                    </div>
+                    <svg class="sparkline" viewBox="0 0 100 30" data-sparkline="@sparklineValues" aria-hidden="true"></svg>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div id="uiToast" class="ui-toast" role="status" aria-live="polite" data-toast-filters="@Localizer["FiltersCleared"]" data-toast-favorites="@Localizer["FavoritesCleared"]"></div>
+}

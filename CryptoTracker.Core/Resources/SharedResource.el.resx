@@ -17,4 +17,118 @@
     <data name="Price" xml:space="preserve">
         <value>Τρέχουσα Τιμή</value>
     </data>
+    <data name="NavHome" xml:space="preserve">
+        <value>Αρχική</value>
+    </data>
+    <data name="NavPrivacy" xml:space="preserve">
+        <value>Προστασία</value>
+    </data>
+    <data name="Language" xml:space="preserve">
+        <value>Γλώσσα</value>
+    </data>
+    <data name="LiveMarketPrices" xml:space="preserve">
+        <value>Ζωντανές τιμές αγοράς από CoinGecko.</value>
+    </data>
+    <data name="PricesIn" xml:space="preserve">
+        <value>Οι τιμές εμφανίζονται σε {0}.</value>
+    </data>
+    <data name="Currency" xml:space="preserve">
+        <value>Νόμισμα</value>
+    </data>
+    <data name="CurrencyEur" xml:space="preserve">
+        <value>EUR</value>
+    </data>
+    <data name="CurrencyUsd" xml:space="preserve">
+        <value>USD</value>
+    </data>
+    <data name="CurrencyGbp" xml:space="preserve">
+        <value>GBP</value>
+    </data>
+    <data name="FavoritesOnly" xml:space="preserve">
+        <value>Μόνο αγαπημένα</value>
+    </data>
+    <data name="AutoRefresh" xml:space="preserve">
+        <value>Αυτόματη ανανέωση</value>
+    </data>
+    <data name="RefreshInterval" xml:space="preserve">
+        <value>Διάστημα ανανέωσης</value>
+    </data>
+    <data name="Live" xml:space="preserve">
+        <value>Ζωντανά</value>
+    </data>
+    <data name="MarketCap" xml:space="preserve">
+        <value>Κεφαλαιοποίηση</value>
+    </data>
+    <data name="Volume24h" xml:space="preserve">
+        <value>Όγκος (24ωρο)</value>
+    </data>
+    <data name="LastUpdated" xml:space="preserve">
+        <value>Τελευταία ενημέρωση</value>
+    </data>
+    <data name="CoinsTracked" xml:space="preserve">
+        <value>Νομίσματα</value>
+    </data>
+    <data name="TopGainer24h" xml:space="preserve">
+        <value>Καλύτερη άνοδος (24ωρο)</value>
+    </data>
+    <data name="TopLoser24h" xml:space="preserve">
+        <value>Μεγαλύτερη πτώση (24ωρο)</value>
+    </data>
+    <data name="ErrorRateLimit" xml:space="preserve">
+        <value>Πάρα πολλά αιτήματα. Δοκίμασε ξανά σε λίγο.</value>
+    </data>
+    <data name="ErrorLoading" xml:space="preserve">
+        <value>Δεν ήταν δυνατή η φόρτωση δεδομένων.</value>
+    </data>
+    <data name="Retry" xml:space="preserve">
+        <value>Επανάληψη</value>
+    </data>
+    <data name="NoData" xml:space="preserve">
+        <value>Δεν υπάρχουν διαθέσιμα δεδομένα.</value>
+    </data>
+    <data name="SearchPlaceholder" xml:space="preserve">
+        <value>Αναζήτηση με όνομα ή σύμβολο</value>
+    </data>
+    <data name="SortBy" xml:space="preserve">
+        <value>Ταξινόμηση</value>
+    </data>
+    <data name="SortName" xml:space="preserve">
+        <value>Όνομα</value>
+    </data>
+    <data name="SortPrice" xml:space="preserve">
+        <value>Τιμή</value>
+    </data>
+    <data name="SortChange" xml:space="preserve">
+        <value>Μεταβολή 24ωρου</value>
+    </data>
+    <data name="ResultsCount" xml:space="preserve">
+        <value>Αποτελέσματα: {0}</value>
+    </data>
+    <data name="FavoritesFirst" xml:space="preserve">
+        <value>Αγαπημένα πρώτα</value>
+    </data>
+    <data name="ClearFilters" xml:space="preserve">
+        <value>Καθαρισμός φίλτρων</value>
+    </data>
+    <data name="MarketCapTooltip" xml:space="preserve">
+        <value>Συνολική αξία της κυκλοφορούσας ποσότητας.</value>
+    </data>
+    <data name="Volume24hTooltip" xml:space="preserve">
+        <value>Όγκος συναλλαγών των τελευταίων 24 ωρών.</value>
+    </data>
+    <data name="ClearFavorites" xml:space="preserve">
+        <value>Καθαρισμός αγαπημένων</value>
+    </data>
+    <data name="FavoritesCleared" xml:space="preserve">
+        <value>Τα αγαπημένα καθαρίστηκαν.</value>
+    </data>
+    <data name="FiltersCleared" xml:space="preserve">
+        <value>Τα φίλτρα καθαρίστηκαν.</value>
+    </data>
+    <data name="FavoriteBadge" xml:space="preserve">
+        <value>Αγαπημένο</value>
+    </data>
+    <data name="CoinsLimit" xml:space="preserve">
+        <value>Νομίσματα</value>
+    </data>
 </root>
